@@ -3,11 +3,12 @@
 
 from conans import ConanFile, CMake, tools
 import os
+import shutil
 
 
 class LibnameConan(ConanFile):
     name = "serf-cpp"
-    version = "0.3.0"
+    version = "b87eadf"
     description = "C++ implementation of serf client (http://www.serfdom.io)"
     url = "https://github.com/matthew-d-jones/conan-serf-cpp"
     homepage = "https://github.com/CJLove/serf-cpp"
@@ -28,9 +29,8 @@ class LibnameConan(ConanFile):
     source_subfolder = "source_subfolder"
     build_subfolder = "build_subfolder"
 
-
     requires = (
-        "msgpack/2.1.5@bincrafters/stable"
+        "msgpack/1.4.2@matthew-d-jones/stable"
     )
 
     def config_options(self):
@@ -38,19 +38,22 @@ class LibnameConan(ConanFile):
             del self.options.fPIC
 
     def source(self):
-        source_url = "https://github.com/CJLove/serf-cpp"
-        tools.get("{0}/archive/v{1}.tar.gz".format(source_url, self.version))
-        extracted_dir = self.name + "-" + self.version
+        self.run("git clone " + self.homepage + ".git")
+        self.run("cd " + self.name + " && git checkout " + self.version + " && cd ..")
+        os.rename(self.name, self.source_subfolder)
 
-        # Rename to "source_subfolder" is a convention to simplify later steps
-        os.rename(extracted_dir, self.source_subfolder)
+        # Use our wrapper CMakeLists file so msgpack dependency is found
+        os.rename(os.path.join(self.source_subfolder, "CMakeLists.txt"),
+                  os.path.join(self.source_subfolder, "CMakeLists_original.txt"))
+        shutil.copy("CMakeLists.txt",
+                    os.path.join(self.source_subfolder, "CMakeLists.txt"))
 
     def configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions["SERF_CPP_BUILD_EXAMPLE"] = False
         if self.settings.os != 'Windows':
             cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = self.options.fPIC
-        cmake.configure(build_folder=self.build_subfolder)
+        cmake.configure(source_folder=self.source_subfolder, build_folder=self.build_subfolder)
         return cmake
 
     def build(self):
