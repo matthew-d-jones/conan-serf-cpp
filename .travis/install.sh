@@ -23,3 +23,4 @@ pip install conan --upgrade
 pip install conan_package_tools bincrafters_package_tools
 
 conan user
+conan remote add matthew-d-jones-bintray https://api.bintray.com/conan/matthew-d-jones/conan
