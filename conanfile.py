@@ -53,7 +53,7 @@ class LibnameConan(ConanFile):
 
     def configure_cmake(self):
         cmake = CMake(self)
-        cmake.definitions["BUILD_TESTS"] = False # example
+        cmake.definitions["SERF_CPP_BUILD_EXAMPLE"] = False
         if self.settings.os != 'Windows':
             cmake.definitions['CMAKE_POSITION_INDEPENDENT_CODE'] = self.options.fPIC
         cmake.configure(build_folder=self.build_subfolder)
@@ -78,4 +78,4 @@ class LibnameConan(ConanFile):
         self.copy(pattern="*.dylib", dst="lib", keep_path=False)
 
     def package_info(self):
-self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = tools.collect_libs(self)
